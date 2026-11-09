@@ -67,12 +67,17 @@ if ($esPorDefecto) {
 $escritorio = Join-Path ([Environment]::GetFolderPath('Desktop')) 'Gestor de Certificados.lnk'
 $menu = Join-Path ([Environment]::GetFolderPath('StartMenu')) 'Programs\Gestor de Certificados.lnk'
 $shell = New-Object -ComObject WScript.Shell
+# Icono de la marca (resources\icon.ico, desde la 0.7.29). El exe no lo lleva
+# dentro, asi que sin esto los accesos directos ensenarian el de Electron.
+$icono = Join-Path $destino 'resources\icon.ico'
+$hayIcono = Test-Path $icono
 foreach ($ruta in @($escritorio, $menu)) {
   New-Item -ItemType Directory -Force -Path (Split-Path $ruta) | Out-Null
   $acceso = $shell.CreateShortcut($ruta)
   $acceso.TargetPath = $exe
   $acceso.WorkingDirectory = $destino
-  $acceso.Description = 'Gestor de Certificados'
+  $acceso.Description = 'ADGestor'
+  if ($hayIcono) { $acceso.IconLocation = "$icono,0" }
   $acceso.Save()
 }
 
@@ -82,7 +87,7 @@ New-Item -Path $clave -Force | Out-Null
 Set-ItemProperty -Path $clave -Name 'DisplayName' -Value 'Gestor de Certificados'
 Set-ItemProperty -Path $clave -Name 'DisplayVersion' -Value $version
 Set-ItemProperty -Path $clave -Name 'InstallLocation' -Value $destino
-Set-ItemProperty -Path $clave -Name 'DisplayIcon' -Value $exe
+Set-ItemProperty -Path $clave -Name 'DisplayIcon' -Value $(if ($hayIcono) { $icono } else { $exe })
 Set-ItemProperty -Path $clave -Name 'NoModify' -Value 1 -Type DWord
 Set-ItemProperty -Path $clave -Name 'NoRepair' -Value 1 -Type DWord
 $desinstalar = "powershell -NoProfile -Command `"Get-Process -Name 'Gestor de Certificados' -ErrorAction SilentlyContinue | Stop-Process -Force; Remove-Item -Recurse -Force '$destino'; Remove-Item -Force '$escritorio','$menu' -ErrorAction SilentlyContinue; Remove-Item -Path '$clave' -Recurse -Force`""
