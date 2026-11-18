@@ -14,6 +14,9 @@
 # aplicacion, que puede no ser la de por defecto.
 
 $ErrorActionPreference = 'Stop'
+# En Windows PowerShell 5.1 la barra de progreso de Invoke-WebRequest frena la
+# descarga hasta pocos KB/s (2026-11-18: 126 MB que no acababan nunca).
+$ProgressPreference = 'SilentlyContinue'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 $repo = 'jotaa97/gestor-certificados-releases'
